@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>课程工作流启动包</title>
+  <style>
+    :root {
+      --ink: #202124;
+      --muted: #64665f;
+      --line: #d8d5cc;
+      --paper: #fbfaf6;
+      --panel: #ffffff;
+      --blue: #002FA7;
+      --blue-light: #e8edf8;
+      --blue-text: #001c66;
+      --green: #16835f;
+      --green-light: #e8f4ee;
+      --green-text: #0e5c3e;
+      --red: #b63a32;
+      --red-light: #fbeceb;
+      --red-text: #7a241f;
+      --amber: #c4a03c;
+      --amber-light: #faf4e3;
+      --amber-text: #6d5a1e;
+      --shadow: 0 16px 40px rgba(32, 33, 36, .08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.5;
+      color: var(--ink);
+      background: var(--paper);
+      min-height: 100vh;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: minmax(360px, 420px) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      padding: 24px;
+      background: #f4f1e8;
+      border-right: 1px solid var(--line);
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 2px;
+      color: var(--blue-text);
+    }
+
+    .header-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .control-group {
+      margin-bottom: 16px;
+    }
+
+    .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .8);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+
+    .option {
+      display: grid;
+      gap: 2px;
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .72);
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+      font-size: 13px;
+      margin-bottom: 5px;
+      transition: border-color .15s, background .15s, box-shadow .15s;
+    }
+
+    .option strong {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .option span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .option[aria-pressed="true"] {
+      border-color: var(--blue);
+      background: var(--blue-light);
+      box-shadow: inset 3px 0 0 var(--blue);
+    }
+
+    .option.level-standard[aria-pressed="true"] {
+      border-color: var(--green);
+      background: var(--green-light);
+      box-shadow: inset 3px 0 0 var(--green);
+    }
+
+    .option.level-professional[aria-pressed="true"] {
+      border-color: var(--amber);
+      background: var(--amber-light);
+      box-shadow: inset 3px 0 0 var(--amber);
+    }
+
+    .option.level-party[aria-pressed="true"] {
+      border-color: var(--red);
+      background: var(--red-light);
+      box-shadow: inset 3px 0 0 var(--red);
+    }
+
+    .slider-wrap {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .72);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 14px;
+      background: rgba(255, 255, 255, .72);
+    }
+
+    input[type="text"].error {
+      border-color: var(--red);
+      background: var(--red-light);
+    }
+
+    .name-error {
+      color: var(--red);
+      font-size: 12px;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .name-error.show { display: block; }
+
+    .upload-area {
+      border: 2px dashed var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      background: rgba(255,255,255,.5);
+      margin-bottom: 10px;
+    }
+
+    .upload-area:hover {
+      border-color: var(--blue);
+      background: var(--blue-light);
+    }
+
+    .upload-area.dragover {
+      border-color: var(--blue);
+      background: var(--blue-light);
+    }
+
+    .upload-icon {
+      font-size: 28px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .upload-label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .upload-hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .file-list {
+      margin-top: 10px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .file-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .file-item-name {
+      color: var(--ink);
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-item-size {
+      color: var(--muted);
+    }
+
+    .file-remove {
+      width: 22px;
+      height: 22px;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--red);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .level-info {
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    .level-info.standard {
+      background: var(--green-light);
+      color: var(--green-text);
+      border: 1px solid var(--green);
+    }
+
+    .level-info.professional {
+      background: var(--amber-light);
+      color: var(--amber-text);
+      border: 1px solid var(--amber);
+    }
+
+    .level-info.party {
+      background: var(--red-light);
+      color: var(--red-text);
+      border: 1px solid var(--red);
+    }
+
+    .generate-btn {
+      width: 100%;
+      padding: 14px 20px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 8px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+
+    .generate-btn:hover { opacity: .9; }
+    .generate-btn:active { opacity: .8; }
+
+    /* main */
+    main {
+      padding: 28px clamp(20px, 3vw, 40px) 48px;
+      overflow: auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .strategy-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .strategy-intro {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .b-type-params {
+      display: inline-flex;
+      gap: 6px;
+      margin-left: 8px;
+      font-size: 12px;
+      color: var(--green);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .action-button {
+      min-height: 38px;
+      padding: 8px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .action-button.primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+    }
+
+    /* dashboard */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .metric {
+      min-height: 100px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .metric b {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 22px;
+      font-weight: 500;
+      line-height: 1.15;
+      color: var(--blue-text);
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* section */
+    .section {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-head h2 {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    /* workflow */
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .step {
+      position: relative;
+      min-height: 90px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .step small {
+      display: inline-flex;
+      margin-bottom: 4px;
+      color: var(--blue);
+      font-weight: 500;
+      font-size: 12px;
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .step p {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .step.new-step {
+      border-color: var(--green);
+      background: var(--green-light);
+    }
+
+    .step.new-step small { color: var(--green); }
+
+    .step.party-step {
+      border-color: var(--red);
+      background: var(--red-light);
+    }
+
+    .step.party-step small { color: var(--red); }
+
+    /* grid */
+    .grid-two {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    .grid-three {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .card h3 {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 10px;
+      color: var(--ink);
+    }
+
+    .card ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .card li {
+      margin: 5px 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .card.accent-blue { border-top: 4px solid var(--blue); }
+    .card.accent-green { border-top: 4px solid var(--green); }
+    .card.accent-red { border-top: 4px solid var(--red); }
+    .card.accent-amber { border-top: 4px solid var(--amber); }
+
+    /* timeline */
+    .timeline {
+      display: grid;
+      gap: 6px;
+    }
+
+    .time-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 70px;
+      gap: 8px;
+      align-items: center;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .time-row b { font-size: 12px; color: var(--blue); font-weight: 500; }
+    .time-row span { color: var(--muted); font-size: 13px; }
+
+    /* editable timeline */
+    .tl-edit-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 90px 30px;
+      gap: 6px;
+      align-items: center;
+      min-height: 38px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .tl-edit-row.break-row {
+      border-color: var(--amber);
+      background: var(--amber-light);
+      grid-template-columns: 1fr 30px;
+      text-align: center;
+    }
+
+    .tl-edit-row.lunch-row {
+      border-color: var(--amber);
+      background: #f9f3e0;
+      grid-template-columns: 1fr;
+      text-align: center;
+      font-weight: 500;
+      font-size: 13px;
+      color: var(--amber-text);
+      padding: 4px 10px;
+      border-style: dashed;
+    }
+
+    .tl-edit-input {
+      width: 100%;
+      padding: 4px 8px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      font-size: 12px;
+      background: rgba(255,255,255,.72);
+    }
+
+    .tl-edit-input:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+
+    .tl-minute-input {
+      width: 50px;
+      padding: 4px 6px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      font-size: 12px;
+      text-align: center;
+      background: rgba(255,255,255,.72);
+    }
+
+    .tl-minute-input:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+
+    .tl-del-btn {
+      width: 24px;
+      height: 24px;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--red);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tl-del-btn:hover { background: var(--red-light); }
+
+    .tl-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .tl-total.ok {
+      background: var(--green-light);
+      color: var(--green-text);
+      border: 1px solid var(--green);
+    }
+
+    .tl-total.warn {
+      background: var(--red-light);
+      color: var(--red-text);
+      border: 1px solid var(--red);
+    }
+
+    .tl-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .tl-toolbar button {
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--ink);
+    }
+
+    .tl-toolbar button:hover { background: var(--blue-light); }
+
+    /* pills */
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* table */
+    .source-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .source-table th,
+    .source-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    .source-table th {
+      background: #f4f1e8;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .source-table td { color: var(--muted); }
+    .source-table tr:last-child td { border-bottom: 0; }
+
+    /* preview modal */
+    .preview-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(32,33,36,.4);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .preview-overlay.show {
+      display: flex;
+    }
+
+    .preview-modal {
+      width: min(720px, 90vw);
+      max-height: 85vh;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 24px 60px rgba(32,33,36,.2);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .preview-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .preview-head h3 {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .preview-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .preview-actions button {
+      padding: 8px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .preview-actions button.primary-btn {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    .preview-actions button.download-btn {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+    }
+
+    .preview-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .preview-text {
+      font-family: "SF Mono", "Fira Code", Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      background: #f5f5f0;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+    }
+
+    /* toast */
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      display: none;
+      max-width: 320px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: var(--ink);
+      color: #fff;
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      z-index: 100;
+    }
+
+    .toast.show { display: block; }
+
+    .divider {
+      height: 1px;
+      background: var(--line);
+      margin: 16px 0;
+    }
+
+    @media (max-width: 1020px) {
+      .app-shell { grid-template-columns: 1fr; }
+      aside { position: relative; height: auto; border-right: none; border-bottom: 1px solid var(--line); }
+      .dashboard, .grid-three, .grid-two { grid-template-columns: 1fr; }
+      .workflow { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    }
+
+    @media print {
+      aside, .actions, .toast, .preview-overlay { display: none; }
+      .app-shell { display: block; }
+      main { padding: 0; }
+      .section, .metric { box-shadow: none; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside>
+      <h1>课程工作流启动包</h1>
+      <p class="header-sub">选择参数 → 上传材料 → 生成启动包 → 粘贴到AI窗口即可开工</p>
+
+      <!-- 课程名称 -->
+      <div class="control-group">
+        <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:500;">课程名称</label>
+        <input type="text" id="courseName" placeholder="如：提高改革攻坚能力" value="">
+        <div class="name-error" id="nameError">⚠ 请填写课程名称后再生成启动包</div>
+      </div>
+
+      <!-- 课程类型 -->
+      <div class="control-group">
+        <div class="label-row">
+          <span>课程类型</span>
+          <span class="tag" id="typeTag">A型 · 讲授式</span>
+        </div>
+        <div id="typeControls"></div>
+      </div>
+
+      <!-- 讲师风格 -->
+      <div class="control-group">
+        <div class="label-row">
+          <span>讲师风格</span>
+          <span class="tag" id="styleTag">专家讲授型</span>
+        </div>
+        <div id="styleControls"></div>
+      </div>
+
+      <!-- 课程时长 -->
+      <div class="control-group">
+        <div class="label-row">
+          <span>课程时长</span>
+          <span class="tag"><span id="minuteValue">150</span> 分钟</span>
+        </div>
+        <div class="slider-wrap">
+          <input id="customMinutes" type="range" min="60" max="420" step="5" value="150">
+        </div>
+        <div id="lengthControls" style="margin-top:6px;"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 内容安全级别（3档预设） -->
+      <div class="control-group">
+        <div class="label-row">
+          <span>内容安全级别</span>
+          <span class="tag" id="levelTag">标准</span>
+        </div>
+        <div id="levelControls"></div>
+        <div id="levelInfoBox" class="level-info standard"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 文件上传 -->
+      <div class="control-group">
+        <div class="label-row">
+          <span>上传课程材料</span>
+          <span class="tag" id="fileCountTag">0 个文件</span>
+        </div>
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon">↑</div>
+          <div class="upload-label">点击或拖拽上传文件</div>
+          <div class="upload-hint">支持 .md .txt .docx .pdf .pptx</div>
+          <input type="file" id="fileInput" multiple accept=".md,.txt,.docx,.pdf,.pptx,.csv,.json" style="display:none">
+        </div>
+        <div class="file-list" id="fileList"></div>
+      </div>
+
+      <button class="generate-btn" id="generateBtn" type="button">生成课程启动包</button>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div>
+          <div class="strategy-title" id="strategyTitle">A型 · 专家讲授型 · 150分钟 · 标准<span class="b-type-params" id="bTypeParams" style="display:none;">4组 | 3轮研讨 | 4角色</span></div>
+          <p class="strategy-intro" id="strategyIntro">逻辑严谨，概念清晰，适合政策和专业课。</p>
+        </div>
+        <div class="actions">
+          <button class="action-button" id="copyBtn" type="button">复制方案摘要</button>
+          <button class="action-button primary" id="printBtn" type="button">打印</button>
+        </div>
+      </div>
+
+      <section class="dashboard" aria-label="课程策略指标">
+        <div class="metric">
+          <b>总时长</b>
+          <strong id="metricDuration">150 分钟</strong>
+          <span id="metricDurationHint">含1次短休息</span>
+        </div>
+        <div class="metric">
+          <b>教学环节</b>
+          <strong id="metricUnits">4-5 个</strong>
+          <span id="metricUnitsHint">按目标优先级编排</span>
+        </div>
+        <div class="metric">
+          <b>演示文稿</b>
+          <strong id="metricSlides">35-50 页</strong>
+          <span id="metricSlidesHint">信息密度按风格调整</span>
+        </div>
+        <div class="metric">
+          <b>互动点</b>
+          <strong id="metricInteraction">2-4 个</strong>
+          <span id="metricInteractionHint">含提问与短练习</span>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>工作流程</h2>
+          <span class="tag">10步 · 参数选择 → 交互引导 → 生成 → 审校 → 交付</span>
+        </div>
+        <div class="workflow" id="workflowSteps"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>生成策略</h2>
+          <span class="tag" id="policyStatus">标准模式</span>
+        </div>
+        <div class="grid-three">
+          <article class="card accent-blue">
+            <h3>课程结构</h3>
+            <ul id="structureList"></ul>
+          </article>
+          <article class="card accent-green">
+            <h3>讲师支持</h3>
+            <ul id="instructorList"></ul>
+          </article>
+          <article class="card accent-red">
+            <h3>交付物</h3>
+            <ul id="deliverableList"></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>时间结构</h2>
+          <span class="tag" id="timePattern">150分钟节奏</span>
+        </div>
+        <div class="timeline" id="timeline"></div>
+        <div class="tl-total" id="tlTotal"></div>
+        <div class="tl-toolbar">
+          <button id="addSegmentBtn" type="button">+ 添加环节</button>
+          <button id="addBreakBtn" type="button">+ 添加休息</button>
+          <button id="addLunchBtn" type="button">+ 添加午休</button>
+          <button id="resetTimelineBtn" type="button">重置为模板</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>来源标注体系</h2>
+          <span class="tag" id="sourceTag">5级标注 + 出处字段</span>
+        </div>
+        <table class="source-table">
+          <thead>
+            <tr><th>标注</th><th>含义</th><th>出处要求</th></tr>
+          </thead>
+          <tbody id="sourceTable"></tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>核验规则</h2>
+          <span class="tag" id="verifyTag">标准核验</span>
+        </div>
+        <table class="source-table">
+          <thead>
+            <tr><th>核验项</th><th>执行规则</th><th>交付标注</th></tr>
+          </thead>
+          <tbody id="verificationTable"></tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>质量检查</h2>
+          <span class="tag">交付前必检</span>
+        </div>
+        <div class="pill-list" id="qualityPills"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 预览模态框 -->
+  <div class="preview-overlay" id="previewOverlay">
+    <div class="preview-modal">
+      <div class="preview-head">
+        <h3>启动包预览</h3>
+        <div class="preview-actions">
+          <button type="button" id="closePreviewBtn">关闭</button>
+          <button type="button" class="download-btn" id="downloadBtn">下载 .txt</button>
+          <button type="button" class="primary-btn" id="copyKickstartBtn">复制到剪贴板</button>
+        </div>
+      </div>
+      <div class="preview-body">
+        <div class="preview-text" id="previewText"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // ===== 数据定义 =====
+
+    // 默认时间结构模板（半天课150分钟）
+    const defaultTimelines = {
+      lecture: {
+        half: [
+          { type: "segment", name: "开场、目标说明、问题导入", minutes: 10 },
+          { type: "segment", name: "核心框架与关键概念", minutes: 45 },
+          { type: "break", name: "课间休息", minutes: 10 },
+          { type: "segment", name: "案例、数据或方法展开", minutes: 55 },
+          { type: "segment", name: "互动练习、讨论或情景题", minutes: 25 },
+          { type: "segment", name: "总结、行动建议、课后任务", minutes: 5 }
+        ],
+        full: [
+          { type: "segment", name: "开场、目标说明、问题导入", minutes: 10 },
+          { type: "segment", name: "核心框架与关键概念", minutes: 45 },
+          { type: "break", name: "课间休息", minutes: 10 },
+          { type: "segment", name: "案例与方法展开", minutes: 55 },
+          { type: "segment", name: "互动练习、讨论或情景题", minutes: 30 },
+          { type: "segment", name: "上午总结", minutes: 10 },
+          { type: "lunch", name: "午休" },
+          { type: "segment", name: "下午导入+方法论回顾", minutes: 15 },
+          { type: "segment", name: "综合案例或实战演练", minutes: 50 },
+          { type: "break", name: "课间休息", minutes: 10 },
+          { type: "segment", name: "讨论与共创", minutes: 35 },
+          { type: "segment", name: "总结、行动建议、课后任务", minutes: 15 }
+        ]
+      },
+      interactive: {
+        half: [
+          { type: "segment", name: "导入、分组、角色分配", minutes: 10 },
+          { type: "segment", name: "案例背景呈现、冲突点揭示", minutes: 20 },
+          { type: "segment", name: "分组研讨（3个议题）", minutes: 40 },
+          { type: "break", name: "课间休息", minutes: 5 },
+          { type: "segment", name: "成果汇报+交叉互评", minutes: 30 },
+          { type: "segment", name: "教师点评+纠偏补漏", minutes: 25 },
+          { type: "segment", name: "总结迁移+课后延伸", minutes: 20 }
+        ],
+        full: [
+          { type: "segment", name: "导入、分组、角色分配", minutes: 10 },
+          { type: "segment", name: "案例背景呈现、冲突点揭示", minutes: 20 },
+          { type: "segment", name: "第一轮分组研讨", minutes: 30 },
+          { type: "break", name: "课间休息", minutes: 10 },
+          { type: "segment", name: "第二轮分组研讨", minutes: 30 },
+          { type: "segment", name: "上午汇报+互评", minutes: 20 },
+          { type: "lunch", name: "午休" },
+          { type: "segment", name: "下午导入+教师点评", minutes: 15 },
+          { type: "segment", name: "第三轮研讨或实战演练", minutes: 40 },
+          { type: "break", name: "课间休息", minutes: 10 },
+          { type: "segment", name: "成果汇报+交叉互评", minutes: 30 },
+          { type: "segment", name: "教师点评+纠偏+方法论提炼", minutes: 25 },
+          { type: "segment", name: "总结迁移+课后延伸", minutes: 20 }
+        ]
+      }
+    };
+
+    const courseTypes = {
+      lecture: {
+        label: "A型 · 讲授式",
+        desc: "教师单向讲授，适合理论专题、政策解读",
+        letter: "A型",
+        structure: ["以问题导入，建立课程主线", "按概念→框架→案例→启示递进", "保留少量关键提问，避免互动打断逻辑"],
+        deliverables: ["课程大纲", "逐字稿", "HTML演示文稿", "思维导图", "README"]
+      },
+      interactive: {
+        label: "B型 · 互动案例讨论式",
+        desc: "案例驱动+分组研讨+成果汇报+教师点评",
+        letter: "B型",
+        structure: ["案例背景呈现，揭示核心冲突点", "分组研讨，围绕议题深度分析", "成果汇报+交叉互评+教师点评，形成共识"],
+        deliverables: ["课程大纲", "逐字稿", "学员物料包", "HTML演示文稿", "思维导图", "课程概览页", "README"]
+      }
+    };
+
+    const instructorStyles = {
+      expert: {
+        label: "专家讲授型",
+        desc: "逻辑严谨，概念清晰，适合政策和专业课",
+        support: ["提供术语定义和政策边界", "保留论证链条和引用依据", "讲师备注强调重点、难点和易误读点"],
+        slideBias: 1,
+        interactionBias: 0
+      },
+      coach: {
+        label: "实战教练型",
+        desc: "步骤清楚，案例密集，适合能力训练课",
+        support: ["逐字稿用带练口吻展开", "每个模块配置操作任务", "讲师备注突出提示、追问和点评话术"],
+        slideBias: 0,
+        interactionBias: 2
+      },
+      story: {
+        label: "故事启发型",
+        desc: "用故事与案例启发理解，适合通识课",
+        support: ["开场和转场加入故事钩子", "把抽象概念转成场景化表达", "提炼可传播的观点句和类比"],
+        slideBias: -1,
+        interactionBias: 1
+      },
+      consultant: {
+        label: "咨询顾问型",
+        desc: "框架强，结论明确，适合管理者培训",
+        support: ["先给结论，再展开依据", "输出诊断框架和决策清单", "用图表和矩阵组织复杂信息"],
+        slideBias: 1,
+        interactionBias: 0
+      },
+      facilitator: {
+        label: "互动引导型",
+        desc: "擅长提问、控场和讨论，适合共创场景",
+        support: ["提供问题链、分组规则和控场提示", "逐字稿标注计时、研讨引导和收束话术", "设计学员产出物和展示环节"],
+        slideBias: -1,
+        interactionBias: 3
+      }
+    };
+
+    const lengthRules = {
+      half: { label: "半天课", minutes: 150, breaks: "1次短休息", intro: "默认150分钟，互动和休息计入总时长。" },
+      full: { label: "一天课", minutes: 300, breaks: "午休+2次短休息（午休不计入课程时长）", intro: "上午150分钟+午休分隔+下午150分钟，午休不计入课程总时长。" },
+      custom: { label: "自定义", minutes: 150, breaks: "按时长自动安排", intro: "系统按目标优先级压缩或扩展内容，并标注必讲、选讲和拓展。" }
+    };
+
+    // 3档内容安全级别
+    const securityLevels = {
+      standard: {
+        label: "标准",
+        desc: "企业培训、技能课、创新课",
+        colorClass: "level-standard",
+        infoClass: "standard",
+        info: "基础防幻觉 + 简略出处标注\n适用于非政治敏感类课程",
+        antiHallucination: "basic",
+        desensitization: false,
+        secondaryReview: false,
+        sourceLevel: "basic"
+      },
+      professional: {
+        label: "专业",
+        desc: "学术课程、公共管理、专业认证",
+        colorClass: "level-professional",
+        infoClass: "professional",
+        info: "严格防幻觉 + 详细出处标注 + 二次审校（可选）\n适用于专业性强、数据引用密集的课程",
+        antiHallucination: "strict",
+        desensitization: false,
+        secondaryReview: "optional",
+        sourceLevel: "detailed"
+      },
+      party: {
+        label: "党政",
+        desc: "党政类课程、干部培训",
+        colorClass: "level-party",
+        infoClass: "party",
+        info: "严格防幻觉 + 详细出处标注 + 脱敏处理 + 二次审校（强制）\n适用于涉及领导人、政策文件、政治术语的课程",
+        antiHallucination: "strict",
+        desensitization: true,
+        secondaryReview: "mandatory",
+        sourceLevel: "strict"
+      }
+    };
+
+    const workflow = [
+      ["Step 0",   "输入预处理",   "清洗素材，去口语化，来源标注"],
+      ["Step 0.1", "参数确认",     "从启动包读取：类型/风格/时长/安全级别", "new-step"],
+      ["第1轮",    "确认工单",     "AI向用户确认参数，用户回复\"确认\"", "new-step"],
+      ["第2轮",    "上传录音稿",   "AI引导用户上传录音稿/精简稿", "new-step"],
+      ["第3轮",    "上传参考材料", "AI引导用户上传政策文件/案例素材", "new-step"],
+      ["第4轮",    "填写想法",     "AI引导用户填写侧重点/特殊要求", "new-step"],
+      ["第5轮",    "启动确认",     "用户回复\"开始\"，AI执行Step 0", "new-step"],
+      ["Step 0.3", "政策校准",     "核验政策提法+数据口径+脱敏（党政模式）", "party-step"],
+      ["Step 0.5", "类型判定",     "从工单读取A型/B型"],
+      ["Step 1",   "课程大纲",     "结构化大纲，含时间轴+教学目标"],
+      ["Step 2",   "逐字稿",       "含分页标记，受讲师风格影响"],
+      ["Step 2.5", "学员物料包",   "课前/课中/课后三段（仅B型）"],
+      ["Step 3",   "演示文稿",     "HTML瑞士风模板"],
+      ["Step 4",   "思维导图",     "SVG知识结构图"],
+      ["Step 4.5", "概览页",       "HTML单文件，手机自适应（仅B型）"],
+      ["Step 5",   "README",       "文件清单+使用指南+课程参数"],
+      ["Step 6",   "内容安全审校", "自检幻觉+脱敏+出处+待核（专业/党政模式）", "party-step"],
+      ["质检",     "交付",         "逐项质量检查 → 确认交付"]
+    ];
+
+    // ===== 状态 =====
+
+    const state = {
+      type: "lecture",
+      style: "expert",
+      length: "half",
+      customMinutes: 150,
+      securityLevel: "standard",
+      files: [],
+      timeline: []
+    };
+
+    // 初始化时间结构
+    function initTimeline() {
+      const lengthKey = state.length === "custom" ? (state.customMinutes >= 300 ? "full" : "half") : state.length;
+      state.timeline = JSON.parse(JSON.stringify(defaultTimelines[state.type][lengthKey]));
+      // 自定义时长时按比例调整
+      if (state.length === "custom") {
+        const defaultTotal = computeMinutes(defaultTimelines[state.type][lengthKey]);
+        const targetTotal = state.customMinutes;
+        if (defaultTotal !== targetTotal) {
+          const ratio = targetTotal / defaultTotal;
+          state.timeline.forEach(item => {
+            if (item.type === "segment" || item.type === "break") {
+              item.minutes = Math.max(5, Math.round(item.minutes * ratio / 5) * 5);
+            }
+          });
+        }
+      }
+    }
+
+    function computeMinutes(tl) {
+      return tl.reduce((sum, item) => {
+        if (item.type === "lunch") return sum;
+        return sum + item.minutes;
+      }, 0);
+    }
+
+    // ===== 渲染 =====
+
+    function makeButton(key, item, active, onClick, extraClass) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "option" + (extraClass ? " " + extraClass : "");
+      button.setAttribute("aria-pressed", String(active));
+      button.innerHTML = `<strong>${item.label}</strong><span>${item.desc}</span>`;
+      button.addEventListener("click", () => onClick(key));
+      return button;
+    }
+
+    function renderControls() {
+      const typeControls = document.getElementById("typeControls");
+      const styleControls = document.getElementById("styleControls");
+      const lengthControls = document.getElementById("lengthControls");
+      const levelControls = document.getElementById("levelControls");
+
+      typeControls.replaceChildren();
+      styleControls.replaceChildren();
+      lengthControls.replaceChildren();
+      levelControls.replaceChildren();
+
+      Object.entries(courseTypes).forEach(([key, item]) => {
+        typeControls.appendChild(makeButton(key, item, state.type === key, value => {
+          state.type = value;
+          initTimeline();
+          render();
+        }));
+      });
+
+      Object.entries(instructorStyles).forEach(([key, item]) => {
+        styleControls.appendChild(makeButton(key, item, state.style === key, value => {
+          state.style = value;
+          render();
+        }));
+      });
+
+      Object.entries(lengthRules).forEach(([key, item]) => {
+        lengthControls.appendChild(makeButton(key, item, state.length === key, value => {
+          state.length = value;
+          if (value !== "custom") {
+            state.customMinutes = item.minutes;
+            document.getElementById("customMinutes").value = item.minutes;
+          }
+          initTimeline();
+          render();
+        }));
+      });
+
+      Object.entries(securityLevels).forEach(([key, item]) => {
+        levelControls.appendChild(makeButton(key, item, state.securityLevel === key, value => {
+          state.securityLevel = value;
+          render();
+        }, item.colorClass));
+      });
+
+      const level = securityLevels[state.securityLevel];
+      const infoBox = document.getElementById("levelInfoBox");
+      infoBox.className = "level-info " + level.infoClass;
+      infoBox.textContent = level.info;
+    }
+
+    function getLengthRule() {
+      if (state.length !== "custom") return lengthRules[state.length];
+      const minutes = state.customMinutes;
+      const breaks = minutes >= 300 ? "午休+短休（午休不计入）" : minutes >= 150 ? "1次短休息" : "不强制休息";
+      return { ...lengthRules.custom, minutes, breaks };
+    }
+
+    function adjustedSlides(minutes, style) {
+      const base = minutes >= 300 ? [80, 120] : minutes >= 180 ? [35, 50] : [20, 35];
+      const bias = instructorStyles[style].slideBias;
+      const min = Math.max(10, base[0] + bias * 4);
+      const max = Math.max(min + 8, base[1] + bias * 6);
+      return `${min}-${max} 页`;
+    }
+
+    function adjustedInteractions(minutes, style) {
+      const baseMin = minutes >= 300 ? 5 : minutes >= 180 ? 2 : 1;
+      const baseMax = minutes >= 300 ? 10 : minutes >= 180 ? 5 : 3;
+      const bias = instructorStyles[style].interactionBias;
+      const min = Math.max(0, baseMin + Math.min(bias, 1));
+      const max = Math.max(min, baseMax + bias);
+      return `${min}-${max} 个`;
+    }
+
+    function setList(id, items) {
+      const ul = document.getElementById(id);
+      ul.replaceChildren(...items.map(text => {
+        const li = document.createElement("li");
+        li.textContent = text;
+        return li;
+      }));
+    }
+
+    function renderWorkflow() {
+      const wrap = document.getElementById("workflowSteps");
+      wrap.replaceChildren(...workflow.map(item => {
+        const div = document.createElement("article");
+        let cls = "step";
+        if (item[3] === "new-step") cls += " new-step";
+        if (item[3] === "party-step") cls += " party-step";
+        div.className = cls;
+        div.innerHTML = `<small>${item[0]}</small><strong>${item[1]}</strong><p>${item[2]}</p>`;
+        return div;
+      }));
+    }
+
+    function renderTimeline() {
+      const wrap = document.getElementById("timeline");
+      let cumMinutes = 0;
+      const isFullDay = state.timeline.some(item => item.type === "lunch");
+      let afterLunchOffset = 0;
+
+      wrap.replaceChildren(...state.timeline.map((item, idx) => {
+        if (item.type === "lunch") {
+          afterLunchOffset = cumMinutes;
+          const div = document.createElement("div");
+          div.className = "tl-edit-row lunch-row";
+          div.innerHTML = `─── 午休（不计入课程时长） ───`;
+          return div;
+        }
+
+        const start = cumMinutes - afterLunchOffset;
+        const end = start + item.minutes;
+        cumMinutes += item.minutes;
+        const rangeStr = `${start}-${end}分钟`;
+
+        const div = document.createElement("div");
+        if (item.type === "break") {
+          div.className = "tl-edit-row break-row";
+          div.innerHTML = `
+            <input class="tl-edit-input" value="${item.name}" data-idx="${idx}" data-field="name">
+            <button class="tl-del-btn" data-idx="${idx}" title="删除">✕</button>
+          `;
+        } else {
+          div.className = "tl-edit-row";
+          div.innerHTML = `
+            <b>${rangeStr}</b>
+            <input class="tl-edit-input" value="${item.name}" data-idx="${idx}" data-field="name">
+            <input class="tl-minute-input" value="${item.minutes}" data-idx="${idx}" data-field="minutes" type="number" min="5" step="5">
+            <button class="tl-del-btn" data-idx="${idx}" title="删除">✕</button>
+          `;
+        }
+        return div;
+      }));
+
+      // 绑定事件
+      wrap.querySelectorAll(".tl-edit-input, .tl-minute-input").forEach(input => {
+        input.addEventListener("change", (e) => {
+          const idx = Number(e.target.dataset.idx);
+          const field = e.target.dataset.field;
+          if (field === "minutes") {
+            state.timeline[idx].minutes = Math.max(5, Number(e.target.value));
+          } else {
+            state.timeline[idx].name = e.target.value;
+          }
+          renderTimeline();
+          renderTotal();
+        });
+      });
+
+      wrap.querySelectorAll(".tl-del-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.dataset.idx);
+          const segCount = state.timeline.filter(i => i.type === "segment").length;
+          if (state.timeline[idx].type === "segment" && segCount <= 1) return;
+          state.timeline.splice(idx, 1);
+          renderTimeline();
+          renderTotal();
+        });
+      });
+
+      renderTotal();
+    }
+
+    function renderTotal() {
+      const total = computeMinutes(state.timeline);
+      const target = state.customMinutes;
+      const diff = total - target;
+      const el = document.getElementById("tlTotal");
+      if (diff === 0) {
+        el.className = "tl-total ok";
+        el.innerHTML = `✓ 课程总时长：${total} 分钟（与设定时长一致）`;
+      } else if (diff > 0) {
+        el.className = "tl-total warn";
+        el.innerHTML = `⚠ 课程总时长：${total} 分钟（超出设定 ${diff} 分钟，请调整）`;
+      } else {
+        el.className = "tl-total warn";
+        el.innerHTML = `⚠ 课程总时长：${total} 分钟（不足设定 ${-diff} 分钟，请调整）`;
+      }
+    }
+
+    function renderSourceTable() {
+      const level = securityLevels[state.securityLevel];
+      let rows;
+      if (level.sourceLevel === "basic") {
+        rows = [
+          ["[原]", "录音稿原文，未做修改", "标注录音稿文件名+段落号"],
+          ["[改]", "基于录音稿改写", "标注录音稿文件名+段落号+\"基于原文改写\""],
+          ["[补]", "补充内容，非原文非政策文件", "标注信息来源名称+日期"]
+        ];
+      } else if (level.sourceLevel === "detailed") {
+        rows = [
+          ["[原]", "录音稿原文，未做修改", "录音稿文件名+段落号"],
+          ["[改]", "基于录音稿改写", "录音稿文件名+段落号+\"基于原文改写\""],
+          ["[引]", "引用政策文件/讲话原文", "文件名+发布日期+段落号 / 或网页URL"],
+          ["[补]", "补充内容，非原文非政策文件", "信息来源名称+日期 / 或网页URL"],
+          ["[待核]", "暂无法确认出处", "\"暂无法确认出处，需人工核实\""]
+        ];
+      } else {
+        rows = [
+          ["[原]", "录音稿原文，未做修改", "录音稿文件名+段落号"],
+          ["[改]", "基于录音稿改写", "录音稿文件名+段落号+\"基于原文改写\""],
+          ["[引]", "引用政策文件/讲话原文（党政类强制使用）", "文件名+发布日期+段落号 / 或网页URL"],
+          ["[补]", "补充内容（仅限教学设计层面，不能用于事实性内容）", "信息来源名称+日期 / 或网页URL"],
+          ["[脱敏]", "因内容安全要求省略的敏感表述", "[脱敏：原文为XX，因内容安全要求省略]"],
+          ["[待核]", "暂无法确认出处（交付前必须清除）", "\"暂无法确认出处，需人工核实\""]
+        ];
+      }
+      const tbody = document.getElementById("sourceTable");
+      tbody.replaceChildren(...rows.map(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td><strong>${row[0]}</strong></td><td>${row[1]}</td><td>${row[2]}</td>`;
+        return tr;
+      }));
+    }
+
+    function renderVerification() {
+      const level = securityLevels[state.securityLevel];
+      let rows;
+      if (level.sourceLevel === "basic") {
+        rows = [
+          ["来源记录", "记录引用材料来源，保留关键事实出处。", "标注来源名称和链接。"],
+          ["资料时效", "提醒用户确认易变政策、价格、数据和人物信息。", "标注待确认内容。"],
+          ["内容边界", "区分原文、改写和补充。", "使用[原][改][补]标记。"]
+        ];
+      } else if (level.sourceLevel === "detailed") {
+        rows = [
+          ["事实核实", "不得杜撰任何不存在的事实和数据。", "标注[引]或[补]+出处字段。"],
+          ["数据口径", "优先使用最新年度统计公报或主管部门数据。", "标注年份+地区+口径+来源。"],
+          ["来源追溯", "所有引用/数据/讲话必须附带出处字段。", "[原][改][引][补][待核]+出处。"],
+          ["资料时效", "提醒用户确认易变信息。", "标注待确认内容。"],
+          ["内容边界", "区分原文、改写、引用、补充和待核实。", "使用5级标注。"]
+        ];
+      } else {
+        rows = [
+          ["严禁幻觉", "不得杜撰任何事实、数据、文件名、会议名、讲话内容。", "无法确认→[待核]，不得伪装为确定信息。"],
+          ["政策提法", "优先检索近期正式文件、政府官网和权威发布，多方对比。", "标注最新提法+文件名+发布日期。"],
+          ["数据口径", "优先使用最新年度统计公报、白皮书或主管部门数据。", "标注年份+地区+口径+来源链接。"],
+          ["历史资料", "保留教学价值时必须说明历史语境，不能冒充当前表述。", "标注历史年份和适用边界。"],
+          ["媒体解读", "只能作为辅助理解，不替代正式政策和原始数据。", "标注为解读材料，避免结论化引用。"],
+          ["脱敏处理", "领导人名称→\"中央领导同志\"/\"相关领导同志\"。", "[脱敏：原文为XX]。"],
+          ["二次审校", "生成后自检：幻觉/脱敏遗漏/待核/出处/政策矛盾。", "产出《审校报告》。"]
+        ];
+      }
+      const tbody = document.getElementById("verificationTable");
+      tbody.replaceChildren(...rows.map(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td>`;
+        return tr;
+      }));
+    }
+
+    function renderQualityPills() {
+      const level = securityLevels[state.securityLevel];
+      const checks = [
+        "学习目标已覆盖",
+        "时长与时间分配匹配",
+        "时间结构与大纲逐字稿一致",
+        "互动和休息计入总时长",
+        "大纲与逐字稿一致",
+        "演示文稿页码与讲稿对应",
+        "讲师风格稳定",
+        "交付物清单完整",
+        "资料来源可追溯"
+      ];
+      if (level.sourceLevel !== "basic") {
+        checks.splice(4, 0, "最新正式提法已核验", "数据年份和口径已标注", "旧提法未冒充当前表述");
+      }
+      if (level.desensitization) {
+        checks.push("领导人名称已脱敏", "所有[脱敏]标注完整");
+      }
+      if (level.secondaryReview === "mandatory") {
+        checks.push("二次审校报告已产出", "所有[待核]标记已清除");
+      }
+      if (state.type === "interactive") {
+        checks.push("研讨任务和评估表可执行", "分组数量统一为4组");
+      }
+      const wrap = document.getElementById("qualityPills");
+      wrap.replaceChildren(...checks.map(text => {
+        const span = document.createElement("span");
+        span.className = "pill";
+        span.textContent = text;
+        return span;
+      }));
+    }
+
+    function render() {
+      const type = courseTypes[state.type];
+      const style = instructorStyles[state.style];
+      const rule = getLengthRule();
+      const level = securityLevels[state.securityLevel];
+
+      document.getElementById("typeTag").textContent = type.label;
+      document.getElementById("styleTag").textContent = style.label;
+      document.getElementById("minuteValue").textContent = state.customMinutes;
+      document.getElementById("levelTag").textContent = level.label;
+
+      // B型参数展示
+      const bParams = document.getElementById("bTypeParams");
+      bParams.style.display = state.type === "interactive" ? "inline-flex" : "none";
+
+      document.getElementById("strategyTitle").innerHTML =
+        `${type.letter} · ${style.label} · ${state.customMinutes}分钟 · ${level.label}<span class="b-type-params" id="bTypeParams" style="display:${state.type === "interactive" ? "inline-flex" : "none"};">4组 | 3轮研讨 | 4角色</span>`;
+      document.getElementById("strategyIntro").textContent = rule.intro;
+
+      const policyLabels = { standard: "标准模式", professional: "专业模式", party: "党政模式" };
+      document.getElementById("policyStatus").textContent = policyLabels[state.securityLevel];
+
+      const sourceLabels = { basic: "3级标注", detailed: "5级标注 + 出处字段", strict: "5级标注 + 出处字段 + 脱敏" };
+      document.getElementById("sourceTag").textContent = sourceLabels[level.sourceLevel];
+
+      const verifyLabels = { basic: "标准核验", detailed: "专业核验", strict: "党政核验" };
+      document.getElementById("verifyTag").textContent = verifyLabels[level.sourceLevel];
+
+      document.getElementById("timePattern").textContent = `${state.customMinutes}分钟节奏`;
+
+      document.getElementById("metricDuration").textContent = `${state.customMinutes} 分钟`;
+      document.getElementById("metricDurationHint").textContent = rule.breaks;
+      document.getElementById("metricUnits").textContent = state.customMinutes >= 300 ? "6-8 个" : "4-5 个";
+      document.getElementById("metricUnitsHint").textContent = state.customMinutes >= 300 ? "上午认知，下午产出" : "按目标优先级编排";
+      document.getElementById("metricSlides").textContent = adjustedSlides(state.customMinutes, state.style);
+      document.getElementById("metricSlidesHint").textContent = style.label;
+      document.getElementById("metricInteraction").textContent = adjustedInteractions(state.customMinutes, state.style);
+      document.getElementById("metricInteractionHint").textContent = type.label;
+
+      setList("structureList", type.structure);
+      setList("instructorList", style.support);
+      setList("deliverableList", type.deliverables);
+
+      renderControls();
+      renderWorkflow();
+      renderTimeline();
+      renderSourceTable();
+      renderVerification();
+      renderQualityPills();
+    }
+
+    // ===== 时间结构操作 =====
+
+    document.getElementById("addSegmentBtn").addEventListener("click", () => {
+      state.timeline.push({ type: "segment", name: "新环节", minutes: 10 });
+      renderTimeline();
+    });
+
+    document.getElementById("addBreakBtn").addEventListener("click", () => {
+      state.timeline.push({ type: "break", name: "课间休息", minutes: 10 });
+      renderTimeline();
+    });
+
+    document.getElementById("addLunchBtn").addEventListener("click", () => {
+      // 检查是否已有午休
+      if (state.timeline.some(item => item.type === "lunch")) return;
+      // 在合适位置插入午休（累计分钟>=150的位置之后）
+      let cum = 0;
+      let insertIdx = state.timeline.length;
+      for (let i = 0; i < state.timeline.length; i++) {
+        if (state.timeline[i].type !== "lunch") cum += state.timeline[i].minutes;
+        if (cum >= 150) { insertIdx = i + 1; break; }
+      }
+      state.timeline.splice(insertIdx, 0, { type: "lunch", name: "午休" });
+      renderTimeline();
+    });
+
+    document.getElementById("resetTimelineBtn").addEventListener("click", () => {
+      initTimeline();
+      renderTimeline();
+    });
+
+    // ===== 文件上传 =====
+
+    function setupUpload() {
+      const uploadArea = document.getElementById("uploadArea");
+      const fileInput = document.getElementById("fileInput");
+
+      uploadArea.addEventListener("click", () => fileInput.click());
+
+      uploadArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadArea.classList.add("dragover");
+      });
+
+      uploadArea.addEventListener("dragleave", () => {
+        uploadArea.classList.remove("dragover");
+      });
+
+      uploadArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove("dragover");
+        handleFiles(e.dataTransfer.files);
+      });
+
+      fileInput.addEventListener("change", (e) => {
+        handleFiles(e.target.files);
+        fileInput.value = "";
+      });
+    }
+
+    function handleFiles(fileList) {
+      for (const file of fileList) {
+        state.files.push({
+          name: file.name,
+          size: file.size,
+          type: file.type || "unknown"
+        });
+      }
+      renderFileList();
+      document.getElementById("fileCountTag").textContent = `${state.files.length} 个文件`;
+    }
+
+    function renderFileList() {
+      const wrap = document.getElementById("fileList");
+      wrap.replaceChildren(...state.files.map((file, idx) => {
+        const div = document.createElement("div");
+        div.className = "file-item";
+        const sizeStr = file.size < 1024 ? `${file.size}B` :
+                        file.size < 1024*1024 ? `${(file.size/1024).toFixed(1)}KB` :
+                        `${(file.size/1024/1024).toFixed(1)}MB`;
+        div.innerHTML = `
+          <span class="file-item-name">${file.name}</span>
+          <span class="file-item-size">${sizeStr}</span>
+          <button class="file-remove" data-idx="${idx}" title="移除">✕</button>
+        `;
+        return div;
+      }));
+
+      wrap.querySelectorAll(".file-remove").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.files.splice(Number(btn.dataset.idx), 1);
+          renderFileList();
+          document.getElementById("fileCountTag").textContent = `${state.files.length} 个文件`;
+        });
+      });
+    }
+
+    // ===== 生成启动包 =====
+
+    function buildKickstartText() {
+      const type = courseTypes[state.type];
+      const style = instructorStyles[state.style];
+      const level = securityLevels[state.securityLevel];
+      const courseName = document.getElementById("courseName").value.trim() || "待填课程名称";
+      const rule = getLengthRule();
+      const date = new Date().toLocaleDateString("zh-CN");
+
+      // 来源标注规则
+      let sourceRules;
+      if (level.sourceLevel === "basic") {
+        sourceRules = `[原] 录音稿原文 → 标注：录音稿文件名+段落号
+[改] 基于录音稿改写 → 标注：录音稿文件名+段落号+"基于原文改写"
+[补] 补充内容 → 标注：信息来源名称+日期`;
+      } else if (level.sourceLevel === "detailed") {
+        sourceRules = `[原] 录音稿原文 → 标注：录音稿文件名+段落号
+[改] 基于录音稿改写 → 标注：录音稿文件名+段落号+"基于原文改写"
+[引] 引用政策文件/讲话 → 标注：文件名+发布日期+段落号 / 或网页URL
+[补] 补充内容 → 标注：信息来源名称+日期 / 或网页URL
+[待核] 暂无法确认出处 → "暂无法确认出处，需人工核实"`;
+      } else {
+        sourceRules = `[原] 录音稿原文 → 标注：录音稿文件名+段落号
+[改] 基于录音稿改写 → 标注：录音稿文件名+段落号+"基于原文改写"
+[引] 引用政策文件/讲话（党政类强制使用） → 标注：文件名+发布日期+段落号 / 或网页URL
+[补] 补充内容（仅限教学设计层面，不能用于事实性内容） → 标注：信息来源名称+日期 / 或网页URL
+[脱敏] 因内容安全要求省略的敏感表述 → [脱敏：原文为XX，因内容安全要求省略]
+[待核] 暂无法确认出处（交付前必须清除） → "暂无法确认出处，需人工核实"`;
+      }
+
+      // 内容安全规则
+      let securityRules;
+      if (level.sourceLevel === "basic") {
+        securityRules = `一、基础防幻觉
+  1. 不得杜撰任何不存在的事实和数据
+  2. 无法确认的内容标注[待核]
+  3. 补充内容标注来源`;
+      } else if (level.sourceLevel === "detailed") {
+        securityRules = `一、严格防幻觉
+  1. 不得杜撰任何不存在的事实、数据、文件名
+  2. 无法确认的内容必须标注[待核]，不得伪装为确定信息
+  3. 所有政策表述必须标注出处
+  4. 所有数据引用必须标注出处（年份+地区+口径+来源）
+
+二、二次审校（可选）
+  生成完成后，建议按以下清单自检：
+  1. 是否有杜撰的事实/数据/文件名？
+  2. 所有[待核]标记是否已处理？
+  3. 所有[引]标注是否附带出处？`;
+      } else {
+        securityRules = `一、严禁幻觉（严格版）
+  1. 不得杜撰任何不存在的事实、数据、文件名、会议名、讲话内容
+  2. 无法确认的内容必须标注[待核]，不得伪装为确定信息
+  3. 所有政策表述只能标注[引]，必须附带出处（文件名+日期+段落）
+  4. 所有数据引用必须标注出处（年份+地区+口径+来源）
+  5. 涉及政策表述、领导人讲话 → 只能用[引]，不能用[补]
+
+二、严格脱敏
+  1. 涉及党和国家领导人时，使用"中央领导同志"/"相关领导同志"替代具体姓名
+  2. 保留会议名称和日期，省略具体姓名
+  3. 涉及敏感政治术语时，用学术化、概括化表述替代
+  4. 脱敏处标注[脱敏：原文为XX，因内容安全要求省略]
+
+三、二次审校（强制·Step 6）
+  生成完成后，必须按以下5项逐条自检：
+  1. 是否有杜撰的事实/数据/文件名？
+  2. 是否有遗漏脱敏的领导人名称？
+  3. 所有[待核]标记是否已处理？
+  4. 所有[引]标注是否附带出处？
+  5. 是否有与已知政策文件矛盾的表述？
+  产出《审校报告》`;
+      }
+
+      // 文件列表
+      const fileListSection = state.files.length > 0
+        ? `\n## 上传材料清单\n${state.files.map(f => {
+            const sizeStr = f.size < 1024 ? `${f.size}B` :
+                            f.size < 1024*1024 ? `${(f.size/1024).toFixed(1)}KB` :
+                            `${(f.size/1024/1024).toFixed(1)}MB`;
+            return `- ${f.name} (${sizeStr})`;
+          }).join("\n")}\n\n请在AI对话窗口中上传以上文件，再执行工作流指令。`
+        : `\n## 上传材料\n请在AI引导下逐轮上传录音稿和参考材料（见下方交互脚本）。`;
+
+      // 时间结构文本
+      const timelineText = buildTimelineText();
+
+      // 交互脚本（第5轮包含时间结构）
+      const interactionScript = `\n## 交互脚本\n收到本启动包后，请按以下顺序与用户交互，逐轮引导，不要跳步：
+
+第1轮 · 确认工单
+  你说：「收到课程工作流启动包。确认以下参数：
+  课程名称：${courseName}
+  课程类型：${type.label}（${type.letter}）
+  讲师风格：${style.label}
+  课程时长：${state.customMinutes}分钟
+  内容安全级别：${level.label}${level.desensitization ? "（含脱敏处理）" : ""}
+  参数无误，请回复"确认"。如有修改请直接告知。」
+  等待用户回复"确认"后，进入第2轮。
+
+第2轮 · 上传录音稿
+  你说：「请上传您的课程录音稿（或精简稿）。
+  支持 .md / .txt / .docx / .pdf 格式。
+  如果没有录音稿，回复"无录音稿"，我将按Tier 3（最小输入）模式处理。」
+  等待用户上传文件或回复"无录音稿"后，进入第3轮。
+
+第3轮 · 上传参考材料
+  你说：「请上传与本课程相关的参考材料（政策文件、教学大纲、案例素材等）。
+  可上传多个文件，也可回复"无补充材料"。${level.desensitization ? "\n注意：如材料包含领导人名称或敏感表述，我将在生成时做脱敏处理。" : ""}」
+  等待用户上传或回复后，进入第4轮。
+
+第4轮 · 填写个人想法
+  你说：「请用几句话描述您对本课程的补充想法：
+  - 希望侧重哪些方面？
+  - 有没有特别想加入的案例或议题？
+  - 受众群体有什么特点？
+  也可回复"无补充"，直接进入生成流程。」
+  等待用户回复后，进入第5轮。
+
+第5轮 · 启动生成
+  你说：「所有材料已收集完毕。即将按以下顺序和时间结构执行课程生成：
+
+${timelineText}
+
+  Step 0  预处理（清洗录音稿/分析材料）
+  ${level.sourceLevel !== "basic" ? "Step 0.3 校准（政策核验" + (level.desensitization ? "+脱敏处理" : "") + "）\n  " : ""}Step 1   大纲 → 确认后继续
+  Step 2   逐字稿
+  ${state.type === "interactive" ? "Step 2.5 学员物料包（4组3轮4角色）\n  " : ""}Step 3   演示文稿
+  Step 4   思维导图
+  ${state.type === "interactive" ? "Step 4.5 概览页\n  " : ""}Step 5   README
+  ${level.secondaryReview === "mandatory" ? "Step 6   内容安全审校（强制）\n  " : level.secondaryReview === "optional" ? "Step 6   内容安全审校（可选）\n  " : ""}质检    交付
+  回复"开始"启动流程。」
+  等待用户回复"开始"后，执行Step 0。`;
+
+      // 产出规范
+      let deliverableSpec;
+      if (state.type === "lecture") {
+        deliverableSpec = `\n## 产出规范（A型 · 4个产出）\n
+| Step | 产出物 | 格式 | 说明 |
+|------|--------|------|------|
+| 1 | 课程大纲 | Markdown | 含章节时间轴、教学目标、页面清单 |
+| 2 | 逐字稿 | Markdown | 含[PAGE X]分页标记，${style.label}风格 |
+| 3 | HTML演示文稿 | HTML | 瑞士风模板，${adjustedSlides(state.customMinutes, state.style)} |
+| 4 | 思维导图 | SVG | 课程知识结构图 |
+| 5 | README | Markdown | 文件清单+使用指南+课程参数 |`;
+      } else {
+        deliverableSpec = `\n## 产出规范（B型 · 6个产出）\n
+| Step | 产出物 | 格式 | 说明 |
+|------|--------|------|------|
+| 1 | 课程大纲 | Markdown | 含六环节时间轴、议题清单、角色卡、评估表 |
+| 2 | 逐字稿 | Markdown | 含[PAGE X]+[计时提示]+[研讨引导]，${style.label}风格 |
+| 2.5 | 学员物料包 | Markdown×6 | 课前/课中/课后三段，4组3轮4角色 |
+| 3 | HTML演示文稿 | HTML | 瑞士风模板，${adjustedSlides(state.customMinutes, state.style)} |
+| 4 | 思维导图 | SVG | 研讨流程图+评估框架 |
+| 4.5 | 课程概览页 | HTML | 手机自适应，可发链接 |
+| 5 | README | Markdown | 文件清单+使用指南+课程参数 |`;
+      }
+
+      // 质量检查清单
+      const qualityChecks = [
+        "学习目标已覆盖",
+        "时长与时间分配匹配",
+        "时间结构与大纲逐字稿一致",
+        "互动和休息计入总时长",
+        "大纲与逐字稿一致",
+        "演示文稿页码与讲稿对应",
+        "讲师风格稳定",
+        "交付物清单完整",
+        "资料来源可追溯"
+      ];
+      if (level.sourceLevel !== "basic") {
+        qualityChecks.splice(4, 0, "最新正式提法已核验", "数据年份和口径已标注", "旧提法未冒充当前表述");
+      }
+      if (level.desensitization) {
+        qualityChecks.push("领导人名称已脱敏", "所有[脱敏]标注完整");
+      }
+      if (level.secondaryReview === "mandatory") {
+        qualityChecks.push("二次审校报告已产出", "所有[待核]标记已清除");
+      }
+      if (state.type === "interactive") {
+        qualityChecks.push("研讨任务和评估表可执行", "分组数量统一为4组");
+      }
+
+      // 组装完整启动包
+      return `═══════════════════════════════════════════════════
+课程工作流启动包 · Course Workflow Kickstart
+═══════════════════════════════════════════════════
+
+【课程参数】
+课程名称：${courseName}
+课程类型：${type.label}（${type.letter}）
+讲师风格：${style.label}
+课程时长：${state.customMinutes} 分钟
+内容安全级别：${level.label}${level.desensitization ? "（含脱敏处理）" : level.secondaryReview === "mandatory" ? "（含强制二次审校）" : level.secondaryReview === "optional" ? "（含可选二次审校）" : ""}
+${state.type === "interactive" ? "B型默认参数：4组 | 3轮研讨 | 4角色（总指挥/记录员/观察员/发言人）\n" : ""}生成日期：${date}
+${fileListSection}
+${interactionScript}
+
+【时间结构】
+${timelineText}
+课程总时长：${computeMinutes(state.timeline)} 分钟
+
+【内容安全规则·${level.label}模式】
+${securityRules}
+
+【来源标注规则】
+${sourceRules}
+${deliverableSpec}
+
+【质量检查清单】
+${qualityChecks.map(c => `- [ ] ${c}`).join("\n")}
+
+═══════════════════════════════════════════════════
+操作步骤：
+① 复制以上全部内容
+② 打开AI对话窗口（WorkBuddy / ChatGPT / DeepSeek / 通义千问等）
+③ 粘贴启动包内容
+④ 将上传的文件拖拽到同一个AI对话窗口
+⑤ 发送
+⑥ AI将按交互脚本逐轮引导您完成课程生产
+═══════════════════════════════════════════════════`;
+    }
+
+    function buildTimelineText() {
+      let cumMinutes = 0;
+      let afterLunchOffset = 0;
+      const lines = [];
+      state.timeline.forEach(item => {
+        if (item.type === "lunch") {
+          afterLunchOffset = cumMinutes;
+          lines.push("─── 午休（不计入课程时长） ───");
+          return;
+        }
+        const start = cumMinutes - afterLunchOffset;
+        const end = start + item.minutes;
+        cumMinutes += item.minutes;
+        if (item.type === "break") {
+          lines.push(`${start}-${end}分钟    ${item.name}                ${item.minutes}分钟`);
+        } else {
+          lines.push(`${start}-${end}分钟    ${item.name}                ${item.minutes}分钟`);
+        }
+      });
+      return lines.join("\n");
+    }
+
+    function showPreview() {
+      // 课程名称验证
+      const nameInput = document.getElementById("courseName");
+      const nameError = document.getElementById("nameError");
+      if (!nameInput.value.trim()) {
+        nameInput.classList.add("error");
+        nameError.classList.add("show");
+        nameInput.focus();
+        return;
+      }
+      nameInput.classList.remove("error");
+      nameError.classList.remove("show");
+
+      const text = buildKickstartText();
+      document.getElementById("previewText").textContent = text;
+      document.getElementById("previewOverlay").classList.add("show");
+    }
+
+    function closePreview() {
+      document.getElementById("previewOverlay").classList.remove("show");
+    }
+
+    function copyKickstart() {
+      const text = document.getElementById("previewText").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById("toast");
+        toast.textContent = "✓ 启动包已复制到剪贴板";
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 3000);
+      }).catch(() => {
+        // 降级：传统 execCommand 方法，兼容 file:// 协议
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        ta.style.top = "0";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          document.execCommand("copy");
+          const toast = document.getElementById("toast");
+          toast.textContent = "✓ 启动包已复制到剪贴板";
+          toast.classList.add("show");
+          setTimeout(() => toast.classList.remove("show"), 3000);
+        } catch (e) {
+          const toast = document.getElementById("toast");
+          toast.textContent = "⚠ 复制失败，请手动选择上方文本并复制";
+          toast.classList.add("show");
+          setTimeout(() => toast.classList.remove("show"), 4000);
+        }
+        document.body.removeChild(ta);
+      });
+    }
+
+    function downloadKickstart() {
+      const text = document.getElementById("previewText").textContent;
+      const courseName = document.getElementById("courseName").value.trim() || "课程";
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${courseName}_工作流启动包.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      const toast = document.getElementById("toast");
+      toast.textContent = "✓ 文件已下载";
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+
+    // ===== 事件绑定 =====
+
+    document.getElementById("customMinutes").addEventListener("input", event => {
+      state.customMinutes = Number(event.target.value);
+      state.length = "custom";
+      initTimeline();
+      render();
+    });
+
+    // 课程名称输入时清除错误
+    document.getElementById("courseName").addEventListener("input", () => {
+      const nameInput = document.getElementById("courseName");
+      const nameError = document.getElementById("nameError");
+      if (nameInput.value.trim()) {
+        nameInput.classList.remove("error");
+        nameError.classList.remove("show");
+      }
+    });
+
+    document.getElementById("copyBtn").addEventListener("click", () => {
+      const summary = document.querySelector(".strategy-title").textContent;
+      navigator.clipboard.writeText(summary).then(() => {
+        const toast = document.getElementById("toast");
+        toast.textContent = "已复制";
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 1500);
+      }).catch(() => {
+        // 降级：传统 execCommand 方法，兼容 file:// 协议
+        const ta = document.createElement("textarea");
+        ta.value = summary;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        ta.style.top = "0";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          document.execCommand("copy");
+          const toast = document.getElementById("toast");
+          toast.textContent = "已复制";
+          toast.classList.add("show");
+          setTimeout(() => toast.classList.remove("show"), 1500);
+        } catch (e) {
+          const toast = document.getElementById("toast");
+          toast.textContent = "⚠ 复制失败，请手动选择上方文本并复制";
+          toast.classList.add("show");
+          setTimeout(() => toast.classList.remove("show"), 4000);
+        }
+        document.body.removeChild(ta);
+      });
+    });
+
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+    document.getElementById("generateBtn").addEventListener("click", showPreview);
+    document.getElementById("closePreviewBtn").addEventListener("click", closePreview);
+    document.getElementById("copyKickstartBtn").addEventListener("click", copyKickstart);
+    document.getElementById("downloadBtn").addEventListener("click", downloadKickstart);
+
+    // 点击overlay背景关闭
+    document.getElementById("previewOverlay").addEventListener("click", (e) => {
+      if (e.target === document.getElementById("previewOverlay")) closePreview();
+    });
+
+    setupUpload();
+    initTimeline();
+    render();
+  </script>
+</body>
+</html>
