@@ -133,4 +133,4 @@ state 变更 → render() → renderWorkflow()    (工作流步骤)
 ## 部署
 
 - **本地使用**：双击 `index.html`，通过 `file://` 协议运行
-- **在线版**：GitHub Pages 自动从 `main` 分支部署，访问 `https://ainenge.github.io/course-workflow-kickstart/`
+- **在线版**：GitHub Pages 自动从 `main` 分支部署，访问 `https://ai-nande.github.io/course-workflow-kickstart/`

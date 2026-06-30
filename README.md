@@ -2,7 +2,7 @@
 
 > 零安装、零AI依赖、零联网 —— 浏览器打开即用的课程生产启动器。
 
-**[>> 在线试用 <<](https://ainenge.github.io/course-workflow-kickstart/)** · 无需下载，直接在浏览器中使用
+**[>> 在线试用 <<](https://ai-nande.github.io/course-workflow-kickstart/)** · 无需下载，直接在浏览器中使用
 
 ---
 
@@ -31,7 +31,7 @@
 
 ### 方式一：在线试用（推荐）
 
-直接访问 **[ainenge.github.io/course-workflow-kickstart](https://ainenge.github.io/course-workflow-kickstart/)** ，在浏览器中即可使用全部功能。
+直接访问 **[ai-nande.github.io/course-workflow-kickstart](https://ai-nande.github.io/course-workflow-kickstart/)** ，在浏览器中即可使用全部功能。
 
 ### 方式二：本地使用
 
