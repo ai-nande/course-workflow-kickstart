@@ -19,6 +19,10 @@
 | 生成启动包 | 输出含5轮交互引导脚本 + 工作流指令 + 质量检查清单的完整文本 |
 | 预览 + 复制 + 下载 | 生成前预览全文，支持一键复制剪贴板或下载 .txt 文件 |
 
+## 界面预览
+
+![课程工作流启动包面板](assets/screenshot.png)
+
 ## 快速开始
 
 1. 下载 `index.html`
@@ -77,6 +81,8 @@ Step 6    内容安全审校（标准跳过 / 专业可选 / 党政强制）
 course-workflow-kickstart/
 ├── index.html                  # 主入口·参数选择面板（单文件，浏览器直接打开）
 ├── README.md                   # 项目说明（本文件）
+├── assets/                     # 静态资源
+│   └── screenshot.png          # 界面截图
 ├── .gitignore
 └── docs/
     └── workflow-spec-v1.2.md   # 标准化生产工作流规范文档
