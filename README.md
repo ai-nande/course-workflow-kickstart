@@ -1,10 +1,167 @@
-# 课程工作流启动包 · Course Workflow Kickstart
+# Course Workflow Kickstart · 课程工作流启动包
 
-> 零安装、零AI依赖、零联网 —— 浏览器打开即用的课程生产启动器。
+**[English](#english) | [中文](#中文)**
 
-**[>> 在线试用 <<](https://ai-nande.github.io/course-workflow-kickstart/)** · 无需下载，直接在浏览器中使用
+> Zero install · Zero AI dependency · Zero network — A course production kickstart tool that runs in your browser.
+
+**[>> Live Demo <<](https://ai-nande.github.io/course-workflow-kickstart/)**
 
 ---
+
+<a id="english"></a>
+
+## What is this
+
+A pure front-end HTML tool that helps you configure parameters and confirm materials before generating a course. It produces a structured **AI Execution Protocol Package** (Prompt + interaction script + quality standards) that you copy-paste into any AI chat window to kickstart a complete course production workflow.
+
+**The panel itself does not call AI or connect to the internet.** Its output is plain text — a protocol package that any AI can follow.
+
+## Key Features
+
+| Feature | Description |
+|---------|-------------|
+| Parameter Selection | Course type (lecture / interactive discussion), instructor style, duration, B-type defaults |
+| Content Safety Levels | 3 presets: Standard / Professional / Government (desensitization + strict sourcing + secondary review) |
+| Timeline Editor | Fine-tune segment durations, add/remove sessions; lunch break excluded from course time |
+| File Upload | Drag-and-drop transcripts / reference materials with local preview |
+| Kickstart Generation | Outputs 5-round interaction script + workflow instructions + quality checklist |
+| Preview + Copy + Download | Full-text preview before generation, one-click clipboard copy or .txt download |
+
+## Screenshot
+
+![Course Workflow Kickstart Panel](assets/screenshot.png)
+
+## Quick Start
+
+### Option 1: Live Demo (Recommended)
+
+Visit **[ai-nande.github.io/course-workflow-kickstart](https://ai-nande.github.io/course-workflow-kickstart/)** — full functionality in your browser, no download needed.
+
+### Option 2: Local Use
+
+1. Download `index.html`
+2. Open it in a browser (double-click)
+3. Select parameters → upload files → click "Generate Course Kickstart"
+4. Copy the generated text and paste it into any AI chat window
+5. The AI follows the interaction script to guide you through uploading materials round by round, then executes the course production
+
+## Workflow Overview
+
+```
+Step 0    Input Preprocessing (Tier1 full / Tier2 transcript only / Tier3 minimal)
+Step 0.1  Parameter Selection + 5-round Interaction Guide (panel generates, AI executes)
+Step 0.3  Policy Calibration (Standard: skip / Professional: optional / Government: mandatory)
+Step 0.5  Type Determination (read A/B type from kickstart)
+Step 1    Outline Generation → User Confirmation
+Step 2    Verbatim Script Generation (with [PAGE X] markers)
+Step 2.5  Student Material Pack (B-type only, printable Markdown)
+Step 3    HTML Presentation Generation (Swiss-style template)
+Step 4    Mind Map Generation (SVG)
+Step 4.5  Course Overview Page (HTML, for external display)
+Step 5    README
+Step 6    Content Safety Review (Standard: skip / Professional: optional / Government: mandatory)
+```
+
+### Type A vs Type B
+
+| | Type A · Lecture | Type B · Interactive Discussion |
+|---|---|---|
+| Deliverables | 4 | 6 |
+| Extra Outputs | — | Student Material Pack + Course Overview Page |
+| Default Params | — | 4 groups, 3 rounds, 4 roles |
+
+## Content Safety Levels
+
+| Level | Anti-Hallucination | Source Attribution | Desensitization | Secondary Review | Use Case |
+|-------|-------------------|-------------------|-----------------|------------------|----------|
+| Standard | Basic | 3-level brief | No | No | Corporate training, skill courses |
+| Professional | Strict | 5-level + source fields | No | Optional | Academic courses, public administration |
+| Government | Strict | 5-level + source fields + links | Mandatory | Mandatory | Government courses, cadre training |
+
+### Source Attribution System
+
+| Tag | Meaning | Source Requirement |
+|-----|---------|-------------------|
+| `[Original]` | Verbatim from transcript | Filename + paragraph number |
+| `[Adapted]` | Rewritten from transcript | Filename + paragraph number |
+| `[Cited]` | Quoted from policy document | Filename + date + paragraph / URL |
+| `[Added]` | Supplementary content | Source name + date / URL |
+| `[Unverified]` | Cannot be confirmed | Marked "requires manual verification" |
+| `[Redacted]` | Omitted for security | Original type noted (Government level only) |
+
+## Project Structure
+
+```
+course-workflow-kickstart/
+├── index.html                  # Main entry · parameter panel (single file, open in browser)
+├── README.md                   # Project documentation (this file)
+├── ARCHITECTURE.md             # Technical architecture & design decisions
+├── assets/
+│   └── screenshot.png          # UI screenshot
+├── .gitignore
+└── docs/
+    └── workflow-spec-v1.2.md   # Standardized production workflow specification
+```
+
+## Technical Highlights
+
+- **Single-file HTML**: No build step, no dependencies — download and use
+- **Pure front-end**: All logic runs locally in the browser, no data sent to any server
+- **Cross-AI platform**: Generated kickstart can be pasted into ChatGPT, DeepSeek, Qwen, WorkBuddy, or any AI window
+- **Clipboard fallback**: `navigator.clipboard` with automatic fallback to `execCommand('copy')` for `file://` protocol
+- **GitHub Pages**: Online version available without download
+
+## Use Cases
+
+- Government courses / cadre training (enable Government-level safety mode)
+- Corporate training / innovation courses (Standard mode)
+- Academic courses / professional certification (Professional mode)
+- Any scenario requiring a structured course production workflow
+
+## Relationship with Similar Projects
+
+This tool focuses on course **production** (instructor → AI → course materials), complementing course **delivery** platforms like [AI-Shifu](https://github.com/ai-shifu/ai-shifu) (platform → learners):
+
+| Dimension | This Project | AI-Shifu |
+|-----------|-------------|----------|
+| Stage | Course Production | Course Delivery |
+| AI Location | External (any AI window) | Embedded (server-side) |
+| Deployment | Zero-install / online | Docker + MySQL |
+| Output | Outline / script / slides / mind map / material pack | In-platform course content |
+| Content Safety | 3 presets (incl. government desensitization) | — |
+
+Can be used in sequence: produce course content with this tool, then import into a delivery platform for personalized teaching.
+
+## Roadmap
+
+### v1.2 (Current)
+- [x] Parameter panel (Type A/B, style, duration, safety level)
+- [x] Editable timeline structure
+- [x] File upload with local preview
+- [x] 5-round interaction script generation
+- [x] 3-tier content safety presets
+- [x] 5-level source attribution system
+- [x] GitHub Pages live demo
+
+### v1.3 (Planned)
+- [ ] Course template library (preset common course type templates)
+- [ ] Parameter config save/load (localStorage)
+- [ ] Multilingual UI (CN/EN)
+- [ ] Mobile responsive optimization
+
+### v2.0 (Long-term)
+- [ ] Course quality scoring system
+- [ ] Team collaboration mode (multi-person parameter negotiation)
+- [ ] Course asset version management
+- [ ] TTS voice output (script → audio)
+
+## License
+
+MIT
+
+---
+
+<a id="中文"></a>
 
 ## 这是什么
 
